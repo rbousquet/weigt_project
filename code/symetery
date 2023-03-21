@@ -1,0 +1,34 @@
+
+
+def prop_multiple_edged_vertex_V0(N,graph):
+    M = graph.shape[0]
+    count=0
+    for i in graph :
+        count1 = 0
+        for j in graph :
+            if list(i) == list(j) :
+                count1 +=1
+        if count1 > 1 :
+            count +=1
+    return count/N
+
+
+def sample_conf_model_V0(N,degree_distrib,n_try):
+    for n in range(n_try) :
+        stubs = degree_distrib.copy()
+        vtx = np.arange(N)  
+        graph = []
+        while vtx.size > 1 :
+            #select 2 vetices
+            pair = np.random.choice(vtx,2,replace=True)
+            graph.append(pair)
+            #remove stubs and verticies that does not have stubs
+            for x in pair :
+                stubs[x]-=1
+                if stubs[x] == 0 :
+                    vtx = np.delete(vtx,np.where(vtx==x))  
+        graph = np.array(graph)
+        # test if the graph can be in the configuration model ensemble
+        if graph.shape[0] == .5*degree_distrib.sum() :
+            return graph
+    return np.array([])
