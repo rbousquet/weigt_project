@@ -57,17 +57,6 @@ def main(path,N_sample,N,p,degree=[1,4],n_try=1000):
     np.save(path,stats)
 
 
-# x=np.array([4,4,4,4,4,4,4,4])
-# N=x.shape[0]
-# graph=sample_conf_model(N,x)
-# print(graph.shape)
-# vertex_counts = np.sum(graph, axis=1)
-# multiple_edges = np.sum(np.equal(vertex_counts, 2))
-# print(graph)
-# print(vertex_counts,multiple_edges)
-
-
-
 if __name__ == "__main__" :
     N_sample=1000
     N=2000
