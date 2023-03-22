@@ -2,6 +2,8 @@ import numpy as np
 import multiprocessing as mp
 from multiprocessing.pool import Pool
 from tqdm import tqdm
+from scipy.sparse import coo_array
+import pickle
 
 def prop_self_edges(graph):
     # M = |{Edges}|
@@ -20,7 +22,8 @@ def get_degree_distrib(N,degree,proba,n_try):
             return distrib
     return None
 
-def sample_conf_model(N,degree_distrib):
+def sample_conf_model(N,degree,proba,n_try):
+    degree_distrib = get_degree_distrib(N,degree,proba,n_try)
     M = degree_distrib.sum()//2
     stubs = np.array([ j  for j in range(N) for i in range(degree_distrib[j])])
     p_stubs = np.array([1 for i in range(2*M)]) 
@@ -35,11 +38,16 @@ def sample_conf_model(N,degree_distrib):
             p_stubs[k]=0
     return np.array(graph)
 
-def one_graph_job(N,degree_distrib):
+def get_stats_self_mult(N,degree_distrib):
     graph = sample_conf_model(N,degree_distrib)
     selfs = prop_self_edges(graph)
     mult = prop_multiple_edged_vertex(graph)
     return [selfs,mult]
+
+def one_graph_job(N,degree,proba,n_try):
+    graph = sample_conf_model(N,degree,proba,n_try)
+    matrix = coo_array((np.ones(graph.shape[0]),tuple(graph.T)), shape=(N,N))
+    return matrix
 
 def apply_pool(pool,N_sample,args):
     apply_async_futs =[]
@@ -49,19 +57,20 @@ def apply_pool(pool,N_sample,args):
 
 def main(path,N_sample,N,p,degree=[1,4],n_try=1000):
     proba  = [1-p,p]
-    degree_distrib = get_degree_distrib(N,degree,proba,n_try)
     n_proc = int(input("How many cpu to use ? : "))
     with Pool(processes=n_proc) as pool :
-        stats=apply_pool(pool,N_sample,(N,degree_distrib,))
-    stats = np.array(stats)
-    np.save(path,stats)
+        results=apply_pool(pool,N_sample,(N,degree,proba,n_try,))
+    results = np.array(results)
+    np.save(path,results)
+
 
 
 if __name__ == "__main__" :
-    N_sample=1000
-    N=2000
-    p=.7
-    expe = "2"
-    path = "./experiment_"+expe+"/"
-    file = f"N_sample{N_sample}_N{N}_p{p}"
-    main(path+file,N_sample,N,p)
+    N_sample=10000
+    N=[100,1000,10000]
+    Proba=np.linspace(0,1,1000)
+    path = "./graphs/"
+    for n in N :
+        for p in Proba :
+            file = f"N_sample{N_sample}_N{n}_p{p:.4f}"
+            main(path+file,N_sample,N,p)
