@@ -53,24 +53,24 @@ def apply_pool(pool,N_sample,args):
     apply_async_futs =[]
     for _ in (range(N_sample)):
         apply_async_futs.append(pool.apply_async(one_graph_job,args))
-    return [x.get() for x in tqdm(apply_async_futs)]
+    return [x.get() for x in (apply_async_futs)]
 
-def main(path,N_sample,N,p,degree=[1,4],n_try=1000):
+def main(path,n_proc,N_sample,N,p,degree=[1,4],n_try=1000):
     proba  = [1-p,p]
-    n_proc = int(input("How many cpu to use ? : "))
+    #n_proc = int(input("How many cpu to use ? : "))
     with Pool(processes=n_proc) as pool :
         results=apply_pool(pool,N_sample,(N,degree,proba,n_try,))
-    results = np.array(results)
-    np.save(path,results)
+    np.save(path,np.array(results))
 
 
 
 if __name__ == "__main__" :
-    N_sample=10000
+    n_proc=11
+    N_sample=10
     N=[100,1000,10000]
-    Proba=np.linspace(0,1,1000)
+    Proba=np.linspace(0,1,500)
     path = "./graphs/"
     for n in N :
-        for p in Proba :
+        for p in tqdm(Proba) :
             file = f"N_sample{N_sample}_N{n}_p{p:.4f}"
-            main(path+file,N_sample,N,p)
+            main(path+file,n_proc,N_sample,n,p)
