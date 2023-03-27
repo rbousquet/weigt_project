@@ -57,7 +57,6 @@ def apply_pool(pool,N_sample,args):
 
 def main(path,n_proc,N_sample,N,p,degree=[1,4],n_try=1000):
     proba  = [1-p,p]
-    #n_proc = int(input("How many cpu to use ? : "))
     with Pool(processes=n_proc) as pool :
         results=apply_pool(pool,N_sample,(N,degree,proba,n_try,))
     np.save(path,np.array(results))
@@ -65,11 +64,12 @@ def main(path,n_proc,N_sample,N,p,degree=[1,4],n_try=1000):
 
 
 if __name__ == "__main__" :
-    n_proc=11
-    N_sample=10
-    N=[100,1000,10000]
+    available = mp.cpu_count()
+    n_proc = int(input(f"How many cpu to use ? ({available} available) : "))
+    N_sample=1000
+    N=[10000]
     Proba=np.linspace(0,1,500)
-    path = "./graphs/"
+    path = "./graphs_2/"
     for n in N :
         for p in tqdm(Proba) :
             file = f"N_sample{N_sample}_N{n}_p{p:.4f}"
