@@ -11,7 +11,7 @@ def velocities(p1,p2,p3,p4):
     Vp4 = - p4*(1-p_sup**4)
     Vp3 = - p3 * (1-p_sup**3) + 4*p4 * p_inf * p_sup**3  
     Vp2 = - p2 + 6*p4 * p_inf**2 * p_sup**2 + 3*p3*p_inf*p_inf**2
-    Vp1 = - p1 + 4*p4 * p_inf**3 * p_sup + 3*p3 * p_inf**2* p_sup + 4*p2 * p_inf * p_sup
+    Vp1 = - p1 + 4*p4 * p_inf**3 * p_sup + 3*p3 * p_inf**2* p_sup + 2*p2 * p_inf * p_sup
     Vp0 =   p1 + p2 + p3 * p_inf**3 + p4* p_inf**4
 
     return Vp0,Vp1,Vp2,Vp3,Vp4
