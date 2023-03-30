@@ -2,16 +2,23 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.colors import ListedColormap, LinearSegmentedColormap
-from color import shiftedColorMap 
+from tqdm import tqdm
 
 def velocities(p1,p2,p3,p4):
-    p_inf = p1+p2
-    p_sup = p3+p4 
-    
+    p_inf = p1+2*p2
+    p_sup = 3*p3+4*p4 
+    pr = p_inf+p_sup
+
+    if pr<=0 :
+        return 0,0,0,0,0
+
+    p_inf /=pr
+    p_sup /=pr
+
     Vp4 = - p4*(1-p_sup**4)
     Vp3 = - p3 * (1-p_sup**3) + 4*p4 * p_inf * p_sup**3  
-    Vp2 = - p2 + 6*p4 * p_inf**2 * p_sup**2 + 3*p3*p_inf*p_inf**2
-    Vp1 = - p1 + 4*p4 * p_inf**3 * p_sup + 3*p3 * p_inf**2* p_sup + 2*p2 * p_inf * p_sup
+    Vp2 = - p2 + 6*p4 * p_inf**2 * p_sup**2 + 3*p3*p_inf*p_sup**2
+    Vp1 = - p1 + 4*p4 * p_inf**3 * p_sup + 3*p3 * p_inf**2* p_sup #+ 2*p2 * p_inf * p_sup
     Vp0 =   p1 + p2 + p3 * p_inf**3 + p4* p_inf**4
 
     return Vp0,Vp1,Vp2,Vp3,Vp4
@@ -24,7 +31,8 @@ def trajectories(p04,max_iter,dt=1e-4):
     p0 = 0
     X = []
     V = []
-    for _ in range(max_iter) :
+    for i in range(max_iter) :
+
         X.append([p0,p1,p2,p3,p4])
         Vp0,Vp1,Vp2,Vp3,Vp4=velocities(p1,p2,p3,p4)
         V.append([Vp0,Vp1,Vp2,Vp3,Vp4])
@@ -33,23 +41,19 @@ def trajectories(p04,max_iter,dt=1e-4):
         p2 += Vp2*dt
         p3 += Vp3*dt
         p4 += Vp4*dt
-
-        s = sum([p1,p2,p3,p4])
-        p1/=s
-        p2/=s
-        p3/=s
-        p4/=s
         
     return [X,V]
 
-MAX=1000
+MAX=10000
 N_spaces=100
-p03 = 0
 p04 = np.linspace(0,1,N_spaces)
 S =[]
-for p4 in p04:
+for p4 in tqdm(p04):
     S.append(trajectories(p4,max_iter=MAX,dt=1e-2))
 S=np.array(S)
+
+
+
 
 #viridis = shiftedColorMap(mpl.colormaps['coolwarm'],start=0, midpoint=0.8, stop=1.0)
 viridis = mpl.colormaps['coolwarm']
@@ -72,14 +76,16 @@ plt.show()
 print(S.shape)
 
 plt.plot(p04,S[:,0,-1,3]+S[:,0,-1,4])
-#plt.plot(np.linspace(0,1,100),[1/9 for i in range(100)],)
+plt.plot(p04,S[:,0,-1,0])
+
+
 plt.xlabel(r" $\pi$ ")
 plt.ylabel("3-core final size (%)")
 plt.legend()
 plt.savefig("./figures/3_core_final_size_vs_pi.png")
 plt.show()
 
-
+"""
 Vmax = np.max(S[:,1,:,3]+S[:,1,:,4],axis=-1)
 print(Vmax.shape)
 plt.plot(p04,Vmax)
@@ -88,4 +94,4 @@ plt.ylabel("3-core max velocity")
 plt.legend()
 plt.savefig("./figures/3_core_Vmax_vs_pi.png")
 plt.show()
-
+"""
